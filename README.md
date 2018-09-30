@@ -7,3 +7,11 @@ At the end, the plugin returns with some information of the overall execution re
 Number of checks created etc.
 The benefit of this approach is that a lot of information can be pulled out of the system in an easy and
 efficient way.
+
+The plugin generates the following passive checks:
+  Common-Checks:
+    Model
+    System-Status
+    Temperature
+    Power
+    Fan
