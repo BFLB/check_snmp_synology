@@ -9,9 +9,9 @@ The benefit of this approach is that a lot of information can be pulled out of t
 efficient way.
 
 The plugin generates the following passive checks:
-  Common-Checks:
-    Model
-    System-Status
-    Temperature
-    Power
-    Fan
+Common-Checks:
+Model
+System-Status
+Temperature
+Power
+Fan
