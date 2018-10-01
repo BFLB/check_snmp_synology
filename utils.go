@@ -67,6 +67,7 @@ type Metrics struct {
 	Checks        int
 	TimeStart     time.Time
 	TimeToConnect time.Duration
+	TimeToFetch   time.Duration
 	TimeToProcess time.Duration
 	TimeToPrint   time.Duration
 	TimeTotal     time.Duration
