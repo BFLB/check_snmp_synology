@@ -6,7 +6,6 @@ package check_snmp_synology
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/sonjah/gosnmp"
 )
@@ -17,6 +16,8 @@ func CheckSystemStatus(s *gosnmp.GoSNMP, u *Utilities) {
 	exitcode := OK
 	message := ""
 	perfdata := ""
+	stateOk := 1
+	stateCritical := 2
 
 	// Fetch SNMP Data
 	oids := []string{OID_systemStatus}
@@ -35,10 +36,10 @@ func CheckSystemStatus(s *gosnmp.GoSNMP, u *Utilities) {
 
 	// Set response information
 	switch sysStat {
-	case 1:
+	case stateOk:
 		exitcode = OK
 		message = "Normal"
-	case 2:
+	case stateCritical:
 		exitcode = OK
 		message = "Failed"
 	default:
@@ -47,7 +48,7 @@ func CheckSystemStatus(s *gosnmp.GoSNMP, u *Utilities) {
 	}
 
 	// Set perfdata
-	perfdata = fmt.Sprintf("SystemStatus=%s", strconv.Itoa(sysStat))
+	perfdata = fmt.Sprintf("System_Status=%d;;%d", sysStat, stateCritical)
 
 	// Done. Write the check result
 	Write(u.Args.Hostname, service, exitcode, message, perfdata, u)

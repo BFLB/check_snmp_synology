@@ -6,7 +6,7 @@ package check_snmp_synology
 
 import (
 	"fmt"
-	"strconv"
+	"strings"
 
 	"github.com/sonjah/gosnmp"
 )
@@ -17,6 +17,8 @@ func CheckFanStatus(s *gosnmp.GoSNMP, u *Utilities) {
 	exitcode := OK
 	message := ""
 	perfdata := ""
+	stateOk := 1
+	stateCritical := 2
 
 	// Fetch SNMP Data
 	oids := []string{OID_systemFanStatus, OID_CPUFanStatus}
@@ -39,16 +41,20 @@ func CheckFanStatus(s *gosnmp.GoSNMP, u *Utilities) {
 
 	// Set ExitCode
 	switch {
-	case systemFanStat == 1 && cpuFanStat == 1:
+	case systemFanStat == stateOk && cpuFanStat == stateOk:
 		exitcode = OK
-	case systemFanStat == 2 || cpuFanStat == 2:
+	case systemFanStat == stateCritical || cpuFanStat == stateCritical:
 		exitcode = OK
 	default:
 		exitcode = UNKNOWN
 	}
 
 	// Set perfdata
-	perfdata = fmt.Sprintf("SystemFanStatus=%s CPUFanStatus=%s", strconv.Itoa(systemFanStat), strconv.Itoa(cpuFanStat))
+	p := []string{
+		fmt.Sprintf("SystemFan_Status=%d;;%d", systemFanStat, stateCritical),
+		fmt.Sprintf("CPUFan_Status=%d;;%d", cpuFanStat, stateCritical),
+	}
+	perfdata = fmt.Sprint(strings.Join(p, " "))
 
 	// Done. Write the check result
 	Write(u.Args.Hostname, service, exitcode, message, perfdata, u)

@@ -34,9 +34,9 @@ func CheckTemperature(s *gosnmp.GoSNMP, u *Utilities) {
 	temp := result.Variables[0].Value.(int)
 
 	// Set message and perfdata
-	message = fmt.Sprintf("%s\u00b0C", strconv.Itoa(temp))
+	message = fmt.Sprintf("%d\u00b0C", temp)
 	perfdata = strconv.Itoa(temp)
-	perfdata = fmt.Sprintf("Temperature=%s", strconv.Itoa(temp))
+	perfdata = fmt.Sprintf("Temperature=%d;%d;%d", temp, u.Args.TempWarn, u.Args.TempCrit)
 
 	// Set exitcode
 	switch {
