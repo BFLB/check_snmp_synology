@@ -18,6 +18,7 @@ import (
 )
 
 var (
+	pluginVersion = "0.1"
 	// TODO Fix and improve
 	host        = flag.String("H", "", "Synology hostname")
 	version     = flag.String("v", "2c", "SNMP version")
@@ -31,8 +32,12 @@ var (
 	//storageCrit = flag.Int("storCrit", 50, "Critical Storage")
 )
 
+
+
 func main() {
 
+	timeStart := time.Now()
+		
 	flag.Usage = func() {
 		// TODO Fix and improve
 		fmt.Printf("Monitoring-Plugin check_snmp_synology\n")
@@ -43,33 +48,39 @@ func main() {
 		flag.PrintDefaults()
 	}
 
+	flag.Parse()
+	
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 8, 3, ' ', 0)
 	defer w.Flush()
 
-	flag.Parse()
-
+	// Init Utilities
 	var u Utilities
 	u.Args.Commandfile = *commandfile
 	u.Args.TempWarn = *tempWarn
 	u.Args.TempCrit = *tempCrit
 	u.Args.Timeout = *timeout
+	u.Metrics.TimeStart = timeStart
 
 	exitcode := CRITICAL
 	execTimeCrit := u.Args.Timeout
 	execTimeWarn := int((execTimeCrit / 10) * 8)
 
+	// Init SNMP
 	gosnmp.Default.Target = *host
 	gosnmp.Default.Community = *community
 	gosnmp.Default.Timeout = time.Duration(10 * time.Second) // Timeout better suited to walking FIXME variable
 
 	err := gosnmp.Default.Connect()
 	if err != nil {
-		fmt.Printf("Connect err: %v\n", err)
-		os.Exit(1)
+		exitcode = CRITICAL
+		fmt.Printf("%s: Plugin version: %s - %s\n", NagiState(exitcode), pluginVersion, err.Error())
+		os.Exit(exitcode)
 	}
 	defer gosnmp.Default.Conn.Close()
 
+	u.Metrics.TimeToConnect = time.Now().Sub(u.Metrics.TimeStart)
+	
 	// Common checks
 	CheckModel(gosnmp.Default, &u)
 	CheckSystemStatus(gosnmp.Default, &u)
@@ -77,6 +88,8 @@ func main() {
 	CheckPowerStatus(gosnmp.Default, &u)
 	CheckFanStatus(gosnmp.Default, &u)
 
+	u.Metrics.TimeTotal = time.Now().Sub(u.Metrics.TimeStart)
+	
 	// Prepare exit information
 	// Set exitcode
 	if u.Metrics.TimeTotal.Seconds() > float64(u.Args.Timeout) {
@@ -100,7 +113,7 @@ func main() {
 
 	// TODO Make exit function in utils
 	// Print exit information
-	fmt.Printf("%s: Plugin version: %s - %s | %s\n", NagiState(exitcode), "0.1", message, perfdata)
+	fmt.Printf("%s: Plugin version: %s - %s | %s\n", NagiState(exitcode), pluginVersion, message, perfdata)
 
 	// Done. Exit with exitcode
 	os.Exit(exitcode)
