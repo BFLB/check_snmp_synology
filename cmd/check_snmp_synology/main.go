@@ -20,24 +20,24 @@ import (
 var (
 	pluginVersion = "0.1"
 	// TODO Fix and improve
-	host        = flag.String("H", "", "Synology hostname")
-	version     = flag.String("v", "2c", "SNMP version")
-	community   = flag.String("C", "public", "Community")
-	port        = flag.String("P", "161", "Port")
-	timeout     = flag.Int("T", 10, "Timeout")
-	commandfile = flag.String("cmd", "stdout", "Commandfile")
-	tempWarn    = flag.Int("tempWarn", 50, "Warning Temperatur")
-	tempCrit    = flag.Int("tempCrit", 50, "Critical Temperature")
+	host          = flag.String("H", "", "Synology hostname")
+	version       = flag.String("v", "2c", "SNMP version")
+	community     = flag.String("C", "public", "Community")
+	port          = flag.String("P", "161", "Port")
+	timeout       = flag.Int("T", 10, "Timeout")
+	commandfile   = flag.String("cmd", "stdout", "Commandfile")
+	tempWarn      = flag.Int("tempWarn", 50, "Warning Temperatur")
+	tempCrit      = flag.Int("tempCrit", 60, "Critical Temperature") // TODO Set proper value
+	upgradeStatus = flag.Bool("upgradeStatus", true, "Check upgradestatus")
+	diskChecks    = flag.Bool("diskChecks", true, "Creates a check per Disk in addition to the common Disks check")
 	//storageWarn = flag.Int("storWarn", 50, "Warning Storage")
 	//storageCrit = flag.Int("storCrit", 50, "Critical Storage")
 )
 
-
-
 func main() {
 
 	timeStart := time.Now()
-		
+
 	flag.Usage = func() {
 		// TODO Fix and improve
 		fmt.Printf("Monitoring-Plugin check_snmp_synology\n")
@@ -49,17 +49,20 @@ func main() {
 	}
 
 	flag.Parse()
-	
+
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 8, 3, ' ', 0)
 	defer w.Flush()
 
 	// Init Utilities
 	var u Utilities
+	u.Args.Hostname = *host
 	u.Args.Commandfile = *commandfile
 	u.Args.TempWarn = *tempWarn
 	u.Args.TempCrit = *tempCrit
 	u.Args.Timeout = *timeout
+	u.Args.UpgradeStatus = *upgradeStatus
+	u.Args.DiskChecks = *diskChecks
 	u.Metrics.TimeStart = timeStart
 
 	exitcode := CRITICAL
@@ -80,16 +83,22 @@ func main() {
 	defer gosnmp.Default.Conn.Close()
 
 	u.Metrics.TimeToConnect = time.Now().Sub(u.Metrics.TimeStart)
-	
+
+	// Do the checks
+	timeProc := time.Now()
+
 	// Common checks
 	CheckModel(gosnmp.Default, &u)
+	CheckDSM(gosnmp.Default, &u)
 	CheckSystemStatus(gosnmp.Default, &u)
 	CheckTemperature(gosnmp.Default, &u)
 	CheckPowerStatus(gosnmp.Default, &u)
 	CheckFanStatus(gosnmp.Default, &u)
+	CheckDisks(gosnmp.Default, &u)
 
+	u.Metrics.TimeToProcess += time.Now().Sub(timeProc) - u.Metrics.TimeToFetch
 	u.Metrics.TimeTotal = time.Now().Sub(u.Metrics.TimeStart)
-	
+
 	// Prepare exit information
 	// Set exitcode
 	if u.Metrics.TimeTotal.Seconds() > float64(u.Args.Timeout) {

@@ -23,12 +23,12 @@ var (
 	OID_systemFanStatus     = "1.3.6.1.4.1.6574.1.4.1.0"
 	OID_CPUFanStatus        = "1.3.6.1.4.1.6574.1.4.2.0"
 
-	OID_disk       = ""
-	OID_disk2      = ""
-	OID_diskID     = "1.3.6.1.4.1.6574.2.1.1.2"
-	OID_diskModel  = "1.3.6.1.4.1.6574.2.1.1.3"
-	OID_diskStatus = "1.3.6.1.4.1.6574.2.1.1.5"
-	OID_diskTemp   = "1.3.6.1.4.1.6574.2.1.1.6"
+	OID_disk            = "1.3.6.1.4.1.6574.2"
+	OID_diskID          = "1.3.6.1.4.1.6574.2.1.1.2"
+	OID_diskModel       = "1.3.6.1.4.1.6574.2.1.1.3"
+	OID_diskType        = "1.3.6.1.4.1.6574.2.1.1.4"
+	OID_diskStatus      = "1.3.6.1.4.1.6574.2.1.1.5"
+	OID_diskTemperature = "1.3.6.1.4.1.6574.2.1.1.6"
 
 	OID_RAID       = ""
 	OID_RAIDName   = "1.3.6.1.4.1.6574.3.1.1.2"
@@ -49,18 +49,20 @@ var (
 )
 
 type Args struct {
-	Hostname    string
-	Version     int
-	Username    string
-	Password    string
-	Community   string
-	Port        int
-	Timeout     int
-	Commandfile string
-	TempWarn    int
-	TempCrit    int
-	StorageWarn int
-	StorageCrit int
+	Hostname      string
+	Version       int
+	Username      string
+	Password      string
+	Community     string
+	Port          int
+	Timeout       int
+	Commandfile   string
+	TempWarn      int
+	TempCrit      int
+	StorageWarn   int
+	StorageCrit   int
+	UpgradeStatus bool
+	DiskChecks    bool
 }
 
 type Metrics struct {
@@ -92,9 +94,11 @@ func Write(hostname string, service string, exitcode int, message string, perfda
 	var result string
 	// Create the messaga
 	if perfdata != "" {
-		result = fmt.Sprintf("[%d] %s;%s;%s;%d;%s: %s | %s", timestamp, command, hostname, service, exitcode, NagiState(exitcode), message, perfdata)
+		//result = fmt.Sprintf("[%d] %s;%s;%s;%d;%s: %s | %s", timestamp, command, hostname, service, exitcode, NagiState(exitcode), message, perfdata)
+		result = fmt.Sprintf("[%d] %s;%s;%s;%d;%s | %s", timestamp, command, hostname, service, exitcode, message, perfdata)
 	} else {
-		result = fmt.Sprintf("[%d] %s;%s;%s;%d;%s: %s", timestamp, command, hostname, service, exitcode, NagiState(exitcode), message)
+		//result = fmt.Sprintf("[%d] %s;%s;%s;%d;%s: %s", timestamp, command, hostname, service, exitcode, NagiState(exitcode), message)
+		result = fmt.Sprintf("[%d] %s;%s;%s;%d;%s", timestamp, command, hostname, service, exitcode, message)
 	}
 
 	// TODO Errorhandling?

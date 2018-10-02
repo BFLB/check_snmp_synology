@@ -6,24 +6,38 @@ package check_snmp_synology
 
 import (
 	"fmt"
-
+	"time"
+	
 	"github.com/sonjah/gosnmp"
 )
 
 func CheckModel(s *gosnmp.GoSNMP, u *Utilities) {
 	service := "Model"
 	exitcode := OK
+	message := ""
 	perfdata := ""
 
-	oids := []string{OID_model}
-	result, err := s.Get(oids)
+	// Fetch SNMP Data
+	timeFetch := time.Now()
+		
+	oids := []string{OID_model,OID_serialNumber}
+	response, err := s.Get(oids)
+
+	u.Metrics.TimeToFetch += time.Now().Sub(timeFetch)
+
+	// Errorhandling
 	if err != nil {
-		// TODO Errorhandling
+		exitcode = UNKNOWN
+		message = err.Error()
+		Write(u.Args.Hostname, service, exitcode, message, perfdata, u)
 		return
 	}
-	modelname := result.Variables[0].Value
-	var message string
-	message = fmt.Sprintf("%s", modelname)
+	
+	modelname    := response.Variables[0].Value
+	serialnumber := response.Variables[1].Value
+	
+	message = fmt.Sprintf("%s (S/N:%s)", modelname, serialnumber)
+	// Done. Write the check result
 	Write(u.Args.Hostname, service, exitcode, message, perfdata, u)
 
 	return

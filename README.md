@@ -9,9 +9,15 @@ The benefit of this approach is that a lot of information can be pulled out of t
 efficient way.
 
 The plugin generates the following passive checks:
+
 Common-Checks:
+DSM
+Disks
+Fan
 Model
+Power-Status
 System-Status
 Temperature
-Power
-Fan
+
+Optional checks (depending on command line arguments)
+Disk_<Diskname> (One check per disk) 

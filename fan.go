@@ -7,22 +7,28 @@ package check_snmp_synology
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/sonjah/gosnmp"
 )
 
 func CheckFanStatus(s *gosnmp.GoSNMP, u *Utilities) {
+	
 	// Required fields
 	service := "Fan"
-	exitcode := OK
+	exitcode := CRITICAL
 	message := ""
 	perfdata := ""
 	stateOk := 1
 	stateCritical := 2
 
 	// Fetch SNMP Data
+	timeFetch := time.Now()
+
 	oids := []string{OID_systemFanStatus, OID_CPUFanStatus}
-	result, err := s.Get(oids)
+	response, err := s.Get(oids)
+
+	u.Metrics.TimeToFetch += time.Now().Sub(timeFetch)
 
 	// Errorhandling
 	if err != nil {
@@ -33,8 +39,8 @@ func CheckFanStatus(s *gosnmp.GoSNMP, u *Utilities) {
 	}
 
 	// Get the result
-	systemFanStat := result.Variables[0].Value.(int)
-	cpuFanStat := result.Variables[1].Value.(int)
+	systemFanStat := response.Variables[0].Value.(int)
+	cpuFanStat := response.Variables[1].Value.(int)
 
 	// Set message
 	message = fmt.Sprintf("System-Fan:%s, CPU-Fan:%s", fanStatusName(systemFanStat), fanStatusName(cpuFanStat))

@@ -6,22 +6,27 @@ package check_snmp_synology
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sonjah/gosnmp"
 )
 
 func CheckPowerStatus(s *gosnmp.GoSNMP, u *Utilities) {
 	// Required fields
-	service := "Power"
-	exitcode := OK
+	service := "Power-Status"
+	exitcode := CRITICAL
 	message := ""
 	perfdata := ""
 	stateOk := 1
 	stateCritical := 2
 
 	// Fetch SNMP Data
+	timeFetch := time.Now()
+
 	oids := []string{OID_powerStatus}
-	result, err := s.Get(oids)
+	response, err := s.Get(oids)
+
+	u.Metrics.TimeToFetch += time.Now().Sub(timeFetch)
 
 	// Errorhandling
 	if err != nil {
@@ -30,9 +35,10 @@ func CheckPowerStatus(s *gosnmp.GoSNMP, u *Utilities) {
 		Write(u.Args.Hostname, service, exitcode, message, perfdata, u)
 		return
 	}
+	
 
 	// Get the result
-	powerStat := result.Variables[0].Value.(int)
+	powerStat := response.Variables[0].Value.(int)
 
 	// Set response information
 	switch powerStat {

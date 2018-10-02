@@ -6,6 +6,7 @@ package check_snmp_synology
 
 import (
 	"fmt"
+	"time"
 	"strconv"
 
 	"github.com/sonjah/gosnmp"
@@ -14,13 +15,17 @@ import (
 func CheckTemperature(s *gosnmp.GoSNMP, u *Utilities) {
 	// Required fields
 	service := "Temperature"
-	exitcode := OK
+	exitcode := CRITICAL
 	message := ""
 	perfdata := ""
 
 	// Fetch SNMP Data
+	timeFetch := time.Now()
+
 	oids := []string{OID_temperature}
-	result, err := s.Get(oids)
+	response, err := s.Get(oids)
+
+	u.Metrics.TimeToFetch += time.Now().Sub(timeFetch)
 
 	// Errorhandling
 	if err != nil {
@@ -31,7 +36,7 @@ func CheckTemperature(s *gosnmp.GoSNMP, u *Utilities) {
 	}
 
 	// Get the result
-	temp := result.Variables[0].Value.(int)
+	temp := response.Variables[0].Value.(int)
 
 	// Set message and perfdata
 	message = fmt.Sprintf("%d\u00b0C", temp)

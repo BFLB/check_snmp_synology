@@ -6,6 +6,7 @@ package check_snmp_synology
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sonjah/gosnmp"
 )
@@ -13,16 +14,20 @@ import (
 func CheckSystemStatus(s *gosnmp.GoSNMP, u *Utilities) {
 	// Required fields
 	service := "System-Status"
-	exitcode := OK
+	exitcode := CRITICAL
 	message := ""
 	perfdata := ""
 	stateOk := 1
 	stateCritical := 2
 
 	// Fetch SNMP Data
-	oids := []string{OID_systemStatus}
-	result, err := s.Get(oids)
+	timeFetch := time.Now()
 
+	oids := []string{OID_systemStatus}
+	response, err := s.Get(oids)
+
+	u.Metrics.TimeToFetch += time.Now().Sub(timeFetch)
+	
 	// Errorhandling
 	if err != nil {
 		exitcode = UNKNOWN
@@ -30,9 +35,9 @@ func CheckSystemStatus(s *gosnmp.GoSNMP, u *Utilities) {
 		Write(u.Args.Hostname, service, exitcode, message, perfdata, u)
 		return
 	}
-
+		
 	// Get the result
-	sysStat := result.Variables[0].Value.(int)
+	sysStat := response.Variables[0].Value.(int)
 
 	// Set response information
 	switch sysStat {
