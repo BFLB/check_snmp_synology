@@ -30,8 +30,7 @@ var (
 	tempCrit      = flag.Int("tempCrit", 60, "Critical Temperature") // TODO Set proper value
 	upgradeStatus = flag.Bool("upgradeStatus", true, "Check upgradestatus")
 	diskChecks    = flag.Bool("diskChecks", true, "Creates a check per Disk in addition to the common Disks check")
-	//storageWarn = flag.Int("storWarn", 50, "Warning Storage")
-	//storageCrit = flag.Int("storCrit", 50, "Critical Storage")
+	ha            = flag.String("ha", "", "high-availability (<Primary Serialnumber>,<Secondary Serialnumber)")
 )
 
 func main() {
@@ -63,8 +62,9 @@ func main() {
 	u.Args.Timeout = *timeout
 	u.Args.UpgradeStatus = *upgradeStatus
 	u.Args.DiskChecks = *diskChecks
+	u.Args.HA         = *ha
 	u.Metrics.TimeStart = timeStart
-
+	
 	exitcode := CRITICAL
 	execTimeCrit := u.Args.Timeout
 	execTimeWarn := int((execTimeCrit / 10) * 8)
@@ -87,7 +87,7 @@ func main() {
 	// Do the checks
 	timeProc := time.Now()
 
-	// Common checks
+	// Checks
 	CheckModel(gosnmp.Default, &u)
 	CheckDSM(gosnmp.Default, &u)
 	CheckSystemStatus(gosnmp.Default, &u)
@@ -95,6 +95,7 @@ func main() {
 	CheckPowerStatus(gosnmp.Default, &u)
 	CheckFanStatus(gosnmp.Default, &u)
 	CheckDisks(gosnmp.Default, &u)
+	CheckHighAvailability(gosnmp.Default, &u)
 
 	u.Metrics.TimeToProcess += time.Now().Sub(timeProc) - u.Metrics.TimeToFetch
 	u.Metrics.TimeTotal = time.Now().Sub(u.Metrics.TimeStart)

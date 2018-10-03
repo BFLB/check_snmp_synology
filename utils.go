@@ -63,6 +63,7 @@ type Args struct {
 	StorageCrit   int
 	UpgradeStatus bool
 	DiskChecks    bool
+	HA            string
 }
 
 type Metrics struct {
