@@ -20,4 +20,7 @@ System-Status
 Temperature
 
 Optional checks (depending on command line arguments)
-Disk_<Diskname> (One check per disk) 
+Disk_<Diskname> (One check per disk)
+High-Availability
+Expansion-Units
+RAID
