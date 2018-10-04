@@ -11,16 +11,16 @@ efficient way.
 The plugin generates the following passive checks:
 
 Common-Checks:
-DSM
-Disks
-Fan
-Model
-Power-Status
-System-Status
-Temperature
+  DSM
+  Disks
+  Fan
+  Model
+  Power-Status
+  System-Status
+  Temperature
 
-Optional checks (depending on command line arguments)
-Disk_<Diskname> (One check per disk)
-High-Availability
-Expansion-Units
-RAID
+  Optional checks (depending on command line arguments)
+  Disk_<Diskname> (One check per disk)
+  High-Availability
+  Expansion-Units
+  RAID
