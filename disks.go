@@ -79,9 +79,9 @@ func CheckDisks(s *gosnmp.GoSNMP, u *Utilities) {
 	tMax          := maxTemp(disks)
 	switch exitcode {
 	case OK:
-		message = fmt.Sprintf("Total:%d All disks Ok (Max. Temp.%d\u00b0C)", countDisks, tMax)
+		message = fmt.Sprintf("Total:%d All disks Ok (Temperature Min=%d\u00b0C Avg=%d\u00b0C Max.%d\u00b0C)", countDisks, tMin, tAvg, tMax)
 	default:
-		message = fmt.Sprintf("Total:%d Critical:%d Warning:%d Unknown:%d Ok:%d (Max. Temp.%d\u00b0C)", countDisks, countCritical, countWarning, countUnknown, countOk, tMax)
+		message = fmt.Sprintf("Total:%d Critical:%d Warning:%d Unknown:%d Ok:%d (Temperature Min=%d\u00b0C Avg=%d\u00b0C Max.%d\u00b0C)", countDisks, countCritical, countWarning, countUnknown, countOk, tMin, tAvg, tMax)
 	}
 	
 	perfdata = fmt.Sprintf("Disks_Total=%d Disks_OK=%d Disks_WARNING=%d Disks_CRITICAL=%d Disks_UNKNOWN=%d Temp_Min=%d Temp_Avg=%d Temp_Max=%d", countDisks, countOk, countWarning, countCritical, countUnknown, tMin, tAvg, tMax)
@@ -93,13 +93,16 @@ func CheckDisks(s *gosnmp.GoSNMP, u *Utilities) {
 	// If diskCheck set, create check for each disk
 	if u.Args.DiskChecks == true {
 		for i := 0; i < len(disks); i++ {
-			d := disks[i]
+			d := &disks[i]
 			
 			// Set servicename
 			service = d.ID
 			
+			// Set exitcode
+			exitcode = d.Exitcode
+			
 			// Set message
-			message = fmt.Sprintf("Type:%s Model:%s Status%s Temperature:%d\u00b0C", d.DiskType, d.Model, d.StatusName, d.Temperature)
+			message = fmt.Sprintf("Type:%s Model:%s Status:%s Temperature:%d\u00b0C", d.DiskType, d.Model, d.StatusName, d.Temperature)
 	
 			// Set perfdata
 			perfdata = fmt.Sprintf("Disk_Status=%d Disk_Temperature=%d;%d;%d", d.Status, d.Temperature, u.Args.TempWarn, u.Args.TempCrit)
@@ -115,7 +118,7 @@ func CheckDisks(s *gosnmp.GoSNMP, u *Utilities) {
 
 func setStatusAndExitcodes (disks []disk, tempWarn int, tempCrit int){
 	for i := 0; i < len(disks); i++ {
-		d := disks[i]
+		d := &disks[i]
 		// StatusCode
 		switch d.Status {
 		case 1:

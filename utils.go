@@ -30,22 +30,32 @@ var (
 	OID_diskStatus      = "1.3.6.1.4.1.6574.2.1.1.5"
 	OID_diskTemperature = "1.3.6.1.4.1.6574.2.1.1.6"
 
-	OID_RAID       = ""
-	OID_RAIDName   = "1.3.6.1.4.1.6574.3.1.1.2"
-	OID_RAIDStatus = "1.3.6.1.4.1.6574.3.1.1.3"
+	OID_raid          = "1.3.6.1.4.1.6574.3"
+	OID_raidIndex     = "1.3.6.1.4.1.6574.3.1.1.1"
+	OID_raidName      = "1.3.6.1.4.1.6574.3.1.1.2"
+	OID_raidStatus    = "1.3.6.1.4.1.6574.3.1.1.3"
+	OID_raidFreeSize  = "1.3.6.1.4.1.6574.3.1.1.4"
+	OID_raidTotalSize = "1.3.6.1.4.1.6574.3.1.1.5"
+	
+	//OID_Storage                = "1.3.6.1.2.1.25.2.3.1"
+	//OID_StorageDesc            = "1.3.6.1.2.1.25.2.3.1.3"
+	//OID_StorageAllocationUnits = "1.3.6.1.2.1.25.2.3.1.4"
+	//OID_StorageSize            = "1.3.6.1.2.1.25.2.3.1.5"
+	//OID_StorageSizeUsed        = "1.3.6.1.2.1.25.2.3.1.6"
 
-	OID_Storage                = "1.3.6.1.2.1.25.2.3.1"
-	OID_StorageDesc            = "1.3.6.1.2.1.25.2.3.1.3"
-	OID_StorageAllocationUnits = "1.3.6.1.2.1.25.2.3.1.4"
-	OID_StorageSize            = "1.3.6.1.2.1.25.2.3.1.5"
-	OID_StorageSizeUsed        = "1.3.6.1.2.1.25.2.3.1.6"
+	//OID_UpsModel                = "1.3.6.1.4.1.6574.4.1.1.0"
+	//OID_UpsSN                   = "1.3.6.1.4.1.6574.4.1.3.0"
+	//OID_UpsStatus               = "1.3.6.1.4.1.6574.4.2.1.0"
+	//OID_UpsLoad                 = "1.3.6.1.4.1.6574.4.2.12.1.0"
+	//OID_UpsBatteryCharge        = "1.3.6.1.4.1.6574.4.3.1.1.0"
+	//OID_UpsBatteryChargeWarning = "1.3.6.1.4.1.6574.4.3.1.4.0"
 
-	OID_UpsModel                = "1.3.6.1.4.1.6574.4.1.1.0"
-	OID_UpsSN                   = "1.3.6.1.4.1.6574.4.1.3.0"
-	OID_UpsStatus               = "1.3.6.1.4.1.6574.4.2.1.0"
-	OID_UpsLoad                 = "1.3.6.1.4.1.6574.4.2.12.1.0"
-	OID_UpsBatteryCharge        = "1.3.6.1.4.1.6574.4.3.1.1.0"
-	OID_UpsBatteryChargeWarning = "1.3.6.1.4.1.6574.4.3.1.4.0"
+	OID_ebox                 = "1.3.6.1.4.1.6574.105"
+	OID_eboxIndex            = "1.3.6.1.4.1.6574.105.1.1.1"
+	OID_eboxModel            = "1.3.6.1.4.1.6574.105.1.1.2"
+	OID_eboxPower            = "1.3.6.1.4.1.6574.105.1.1.3"
+	OID_eboxRedundantPower   = "1.3.6.1.4.1.6574.105.1.1.4"
+
 )
 
 type Args struct {
@@ -64,6 +74,9 @@ type Args struct {
 	UpgradeStatus bool
 	DiskChecks    bool
 	HA            string
+	Ebox          int
+	RaidWarn      int
+	RaidCrit      int
 }
 
 type Metrics struct {

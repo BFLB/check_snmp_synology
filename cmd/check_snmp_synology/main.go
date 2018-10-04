@@ -31,6 +31,9 @@ var (
 	upgradeStatus = flag.Bool("upgradeStatus", true, "Check upgradestatus")
 	diskChecks    = flag.Bool("diskChecks", true, "Creates a check per Disk in addition to the common Disks check")
 	ha            = flag.String("ha", "", "high-availability (<Primary Serialnumber>,<Secondary Serialnumber)")
+	ebox          = flag.Int("ebox", 0, "Creates a check for each extension unit (0=no ebox | 1=ebox with 1 PS | 2=ebox with 2 PSs)")
+	raidWarn      = flag.Int("raidWarn", 80, "RAID percent warning")
+	raidCrit      = flag.Int("raidCrit", 90, "RAID percent critical")
 )
 
 func main() {
@@ -55,15 +58,18 @@ func main() {
 
 	// Init Utilities
 	var u Utilities
-	u.Args.Hostname = *host
-	u.Args.Commandfile = *commandfile
-	u.Args.TempWarn = *tempWarn
-	u.Args.TempCrit = *tempCrit
-	u.Args.Timeout = *timeout
+	u.Args.Hostname      = *host
+	u.Args.Commandfile   = *commandfile
+	u.Args.TempWarn      = *tempWarn
+	u.Args.TempCrit      = *tempCrit
+	u.Args.Timeout       = *timeout
 	u.Args.UpgradeStatus = *upgradeStatus
-	u.Args.DiskChecks = *diskChecks
-	u.Args.HA         = *ha
-	u.Metrics.TimeStart = timeStart
+	u.Args.Ebox          = *ebox
+	u.Args.DiskChecks    = *diskChecks
+	u.Args.HA            = *ha
+	u.Args.RaidWarn      = *raidWarn
+	u.Args.RaidCrit      = *raidCrit
+	u.Metrics.TimeStart  = timeStart
 	
 	exitcode := CRITICAL
 	execTimeCrit := u.Args.Timeout
@@ -96,7 +102,9 @@ func main() {
 	CheckFanStatus(gosnmp.Default, &u)
 	CheckDisks(gosnmp.Default, &u)
 	CheckHighAvailability(gosnmp.Default, &u)
-
+	CheckEbox(gosnmp.Default, &u)
+	CheckRaid(gosnmp.Default, &u)
+	
 	u.Metrics.TimeToProcess += time.Now().Sub(timeProc) - u.Metrics.TimeToFetch
 	u.Metrics.TimeTotal = time.Now().Sub(u.Metrics.TimeStart)
 
