@@ -88,13 +88,13 @@ func CheckRaid(s *gosnmp.GoSNMP, u *Utilities) {
 		r := &raids[i]
 
 		// Set servicename
-		service = fmt.Sprintf("RAID %s", r.Name)
+		service = fmt.Sprintf("RAID %d", i)
 		
 		// Set exitcode
 		exitcode = r.Exitcode
 			
 		// Set message
-		message = fmt.Sprintf("Status:%s Used:%d%% Free:%dGB Total:%dGB", r.StatusName, r.PercentUsed, r.SizeFree, r.SizeTotal)
+		message = fmt.Sprintf("Name:%s Status:%s Used:%d%% Free:%dGB Total:%dGB", r.Name, r.StatusName, r.PercentUsed, r.SizeFree, r.SizeTotal)
 	
 		// Set perfdata
 		perfdata = fmt.Sprintf("Status=%d Used=%d%% Size_free=%dG Size_total=%dG", r.Status, r.PercentUsed, r.SizeFree, r.SizeTotal)
